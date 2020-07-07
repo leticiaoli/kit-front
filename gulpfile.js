@@ -4,6 +4,9 @@ const minifycss = require('gulp-clean-css');
 const imagemin = require('gulp-imagemin');
 const browserSync = require('browser-sync').create();
 const concat = require('gulp-concat');
+const sass = require('gulp-sass');
+ 
+sass.compiler = require('node-sass');
 
 
 gulp.task('minify-js', function () {
@@ -14,12 +17,13 @@ gulp.task('minify-js', function () {
 });
 
 
-gulp.task('minify-css', function () {
-  return gulp.src('./src/css/**/*.css')
-  .pipe(minifycss({
-    compatibility: 'ie8'
-  }))
-  .pipe(gulp.dest('./build/css'));
+gulp.task('sass', function () {
+  return gulp.src('./src/scss/**/*.scss')
+    .pipe(sass().on('error', sass.logError))
+    .pipe(minifycss({
+      compatibility: 'ie8'
+    }))
+    .pipe(gulp.dest('./build/css'));
 });
 
 
@@ -43,9 +47,9 @@ gulp.task('browser-sync', function() {
 const watch = function () {
   gulp.watch('./index.html').on('change', browserSync.reload);
   gulp.watch('./src/js/**/*.js', ['minify-js']).on('change', browserSync.reload);
-  gulp.watch('./src/css/**/*.css', ['minify-css']).on('change', browserSync.reload);
+  gulp.watch('./src/scss/**/*.scss', ['sass']).on('change', browserSync.reload);
   gulp.watch('./src/img/**/*', ['image-min']).on('change', browserSync.reload);
 }
 
 
-gulp.task('default', gulp.series('image-min', 'minify-js', 'minify-css', 'browser-sync', watch));
+gulp.task('default', gulp.series('image-min', 'minify-js', 'sass', 'browser-sync', watch));
